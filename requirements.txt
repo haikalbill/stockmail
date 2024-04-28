@@ -11,3 +11,4 @@ nltk>=3.8.1
 vaderSentiment>=3.3.2
 forex_python>=1.8
 seaborn>=0.13.2
+pandas-datareader>=0.10.0
