@@ -1,3 +1,4 @@
+import streamlit as st
 import yfinance as yf
 import pandas as pd
 from PIL import Image
@@ -5,7 +6,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import seaborn as sn
 import matplotlib.pyplot as plt
-import streamlit as st
 import base64
 import io
 import os
@@ -113,10 +113,11 @@ with colss[0].container():
     colss[2].write(stock_list)
 
 st.divider()
+stock_ticker = yf.Ticker(stock)
 
 ###stock data###
 with st.container():
-    collu = st.columns([1,1,3])
+    collu = st.columns([2,3])
     current_price = stock_ticker.info["currentPrice"]
     previous_price = stock_ticker.info["previousClose"]
     current_percent = current_price / previous_price * 100 - 100
@@ -124,9 +125,9 @@ with st.container():
     new_current_percent = round(current_percent,5)
     collu[0].title(f":blue[{stock_name}]")
     if current_price < previous_price:
-        collu[2].title(f"{current_price}  🔻:red[{new_current_percent}%]")
+        collu[1].title(f"{current_price}  🔻:red[{new_current_percent}%]")
     else:
-        collu[2].title(f"{current_price}  🔺:green[{new_current_percent}%]")
+        collu[1].title(f"{current_price}  🔺:green[{new_current_percent}%]")
            
 ###stock table###
 with st.container():
