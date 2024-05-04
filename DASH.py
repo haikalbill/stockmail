@@ -122,7 +122,7 @@ with st.container():
     previous_price = stock_ticker.info["previousClose"]
     current_percent = current_price / previous_price * 100 - 100
     #float(current_percent)
-    new_current_percent = round(current_percent,5)
+    new_current_percent = round(current_percent,3)
     collu[0].title(f":blue[{stock_name}]")
     if current_price < previous_price:
         collu[1].title(f"{current_price}  🔻:red[{new_current_percent}%]")
