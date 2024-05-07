@@ -115,6 +115,9 @@ with colss[0].container():
 st.divider()
 stock_ticker = yf.Ticker(stock)
 
+st.write(stock_ticker.recommendations)
+st.write(stock_ticker.recommendations_summary)
+
 ###stock data###
 with st.container():
     collu = st.columns([2,3])
@@ -165,7 +168,8 @@ col1.title('LATEST NEWS ON THE COMPANY')
 news_publisher1 = stock_ticker.news[0]["publisher"]
 news_publisher2 = stock_ticker.news[1]["publisher"]
 news_publisher3 = stock_ticker.news[2]["publisher"]
- 
+news_publisher4 = stock_ticker.news[3]["publisher"]
+news_publisher5 = stock_ticker.news[4]["publisher"]
 with col1:
     with st.container(border = True):
         stock_ticker.news[0]["title"]
@@ -182,6 +186,15 @@ with col1:
         stock_ticker.news[2]["link"]
         st.write(f'Publised by "{news_publisher3}"')   
 
+    with st.container(border = True):
+        stock_ticker.news[3]["title"]
+        stock_ticker.news[3]["link"]
+        st.write(f'Publised by "{news_publisher4}"') 
+        
+    with st.container(border = True):
+        stock_ticker.news[4]["title"]
+        stock_ticker.news[4]["link"]
+        st.write(f'Publised by "{news_publisher5}"') 
 
 with col2:
     stock_ticker.info
