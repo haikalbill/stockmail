@@ -13,6 +13,9 @@ from forex_python.converter import CurrencyRates
 import requests
 from datetime import datetime, timedelta
 import math
+import time
+from functools import partial
+import asyncio        
 
 
 st.set_page_config(page_title="Stockmail",
@@ -38,12 +41,20 @@ gradient_text_html = """
 
 st.markdown(gradient_text_html, unsafe_allow_html=True)
 st.markdown("<p style='font-weight: bold; text-align: inline; font-size: 20px;'>The goal of succesful trader is to make the best trades. Money is secondary</p>", unsafe_allow_html=True)
+# Create a placeholder for the clock
+clock_placeholder = st.empty()
+current_time = datetime.now().strftime("%H:%M:%S")
+#clock_placeholder.write(f"**Current Time: {current_time}**")
+
 
 
 ############################################################################################################################################
 ##sidebar##
 sidebar_title = ''':rainbow[MONEY CHANGER] 💸🔄💰.'''
 st.sidebar.header(sidebar_title)
+#st.sidebar.markdown("![Alt Text](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExem44aXVwYjFrMmU5bnN3ZnIxcThsc292bGxsOWtuaTFtdzZjYWRhYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YnkMcHgNIMW4Yfmjxr/giphy.gif)")
+
+
 
 ##moneychanging##
 amount = st.sidebar.number_input('Enter amount to convert', min_value=0.01, step=0.01)
@@ -108,15 +119,14 @@ with colss[0].container():
     end_date = cols[1].date_input("End Date")
     hist = stock_ticker.history(period="1mo")
     st.markdown("![Alt Text](https://media.giphy.com/media/TLayDh2IZOHPW/giphy.gif)")
-
-    
+    #st.markdown("![Alt](https://media.giphy.com/media/Xf1ghvcjLrMn3O6Qe4/giphy.gif)")
     colss[2].write(stock_list)
 
 st.divider()
 stock_ticker = yf.Ticker(stock)
 
-st.write(stock_ticker.recommendations)
-st.write(stock_ticker.recommendations_summary)
+#st.write(stock_ticker.recommendations)
+#st.write(stock_ticker.recommendations_summary)
 
 ###stock data###
 with st.container():
@@ -143,6 +153,7 @@ with st.container():
     
 ##bar graph##
     cols[1].header("Stock Prices Graph")
+    
     fig = go.Figure(data= go.Candlestick(x=stock_data.index,
                                         open=stock_data['Open'],
                                         high=stock_data['High'],
@@ -153,17 +164,15 @@ with st.container():
                         xaxis_title='Date')
 
     cols[1].plotly_chart(fig)
-
-clicked = st.button('Hit me')
-if clicked:
-    print('Button clicked!')
+    if cols[1].button("Refresh Page"):
+        st.experimental_rerun()
 
 
 ##collumn##    
-col1, col2 = st.columns(2)
-col2.write('Column 1')
+col1, col2 = st.columns([3,2])
+#col2.write('Column 1')
 col1.title('LATEST NEWS ON THE COMPANY')  
-  
+
 ##news##
 news_publisher1 = stock_ticker.news[0]["publisher"]
 news_publisher2 = stock_ticker.news[1]["publisher"]
@@ -197,5 +206,25 @@ with col1:
         st.write(f'Publised by "{news_publisher5}"') 
 
 with col2:
-    stock_ticker.info
-    stock_ticker.news
+    col2.title('  ')
+    st.markdown("![Alt Text](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExem44aXVwYjFrMmU5bnN3ZnIxcThsc292bGxsOWtuaTFtdzZjYWRhYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YnkMcHgNIMW4Yfmjxr/giphy.gif)")
+#    stock_ticker.info
+#    stock_ticker.news
+
+
+# Sidebar with real-time clock
+st.sidebar.header("Real-Time Clock")
+
+# Placeholder for the clock
+clock_placeholder = st.sidebar.empty()
+
+while True:
+    # Get the current time
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Update the clock in the sidebar
+    clock_placeholder.markdown(f"**{now}**")
+    
+    # Sleep for 1 second before updating the time again
+    time.sleep(1)
+
