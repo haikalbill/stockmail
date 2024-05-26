@@ -34,7 +34,7 @@ def main():
     period = n_years * 365
 
     # Load data function
-    @st.cache_data
+    # @st.cache_data
     def load_data(ticker):
         try:
             data = yf.download(ticker, START, TODAY)
