@@ -8,21 +8,28 @@ import seaborn as sn
 import matplotlib.pyplot as plt
 import base64
 import io
+from io import BytesIO
 import os
 from forex_python.converter import CurrencyRates
 import requests
 from datetime import datetime, timedelta
 import math
+import random
 import time
 from functools import partial
 import asyncio        
-
-
+from money import Money
+import requests
+from PIL import Image
+import forecast
+import stockmail
+import welcome
 st.set_page_config(page_title="Stockmail",
                    page_icon=" :bar_chart",
                    layout= "wide"
                    )
 ##page layout##
+
 gradient_text_html = """
 <style>
 .gradient-text {
@@ -39,192 +46,160 @@ gradient_text_html = """
 <div class="gradient-text">STOCKMAIL</div>
 """
 
-st.markdown(gradient_text_html, unsafe_allow_html=True)
-st.markdown("<p style='font-weight: bold; text-align: inline; font-size: 20px;'>The goal of succesful trader is to make the best trades. Money is secondary</p>", unsafe_allow_html=True)
+logocol1, logocol2 = st.columns([1, 6])
+logo2 = "https://i.ibb.co/PNPWVmv/4-removebg-preview.png"
+logo1 = "https://i.ibb.co/r7xKkT5/2-removebg-preview-2.png"
+logocol1.image(logo1)
+logocol2.markdown(gradient_text_html, unsafe_allow_html=True)
+logocol2.markdown("<p style='font-weight: bold; text-align: inline; font-size: 20px;'>The goal of succesful trader is to make the best trades. Money is secondary</p>", unsafe_allow_html=True)
 # Create a placeholder for the clock
 clock_placeholder = st.empty()
 current_time = datetime.now().strftime("%H:%M:%S")
 #clock_placeholder.write(f"**Current Time: {current_time}**")
 
 
-
 ############################################################################################################################################
-##sidebar##
-sidebar_title = ''':rainbow[MONEY CHANGER] 💸🔄💰.'''
-st.sidebar.header(sidebar_title)
+ ##sidebar##
+ 
+ ##navigation##
+# Define a function for each page
+
+def page_welcome():
+    welcome.main()
+    
+def page_forecast():
+    forecast.main()
+
+def page_stockmail():
+    stockmail.main()
+
+# Create a dictionary of pages
+pages = {
+    '🏠 Home': page_welcome,
+    '📊 Stockmail': page_stockmail,
+    '🌦️ Stock Forecast': page_forecast
+}
+
+# Add a selectbox to the sidebar for navigation
+st.sidebar.markdown("<p style='font-weight: bold; text-align: inline; font-size: 20px;'>🚩 NAVIGATION </p>", unsafe_allow_html=True)
+selection = st.sidebar.radio('Go to', list(pages.keys()))
+st.sidebar.divider()
+st.sidebar.markdown("<p style='font-weight: bold; text-align: inline; font-size: 20px;'>🔄 CURRENCY EXCHANGE </p>", unsafe_allow_html=True)
 #st.sidebar.markdown("![Alt Text](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExem44aXVwYjFrMmU5bnN3ZnIxcThsc292bGxsOWtuaTFtdzZjYWRhYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YnkMcHgNIMW4Yfmjxr/giphy.gif)")
 
 
-
 ##moneychanging##
-amount = st.sidebar.number_input('Enter amount to convert', min_value=0.01, step=0.01)
+# Input fields
 
-from_currency = st.sidebar.selectbox('From Currency', options=["USD", "EUR", "JPY", "GBP", "AUD", "CAD", "CHF", "CNY", "SEK", "NZD",
-    "MXN", "SGD", "HKD", "NOK", "KRW", "TRY", "RUB", "INR", "BRL", "ZAR",
-    "SAR", "AED", "PLN", "THB", "IDR", "DKK", "MYR", "HUF", "CZK", "ILS",
-    "CLP", "PHP", "COP", "TWD", "ARS", "VND", "EGP", "KWD", "QAR", "NGN",
-    "BDT", "RON", "PKR", "IQD", "CUC", "OMR", "CUP", "JOD", "BHD", "DZD",
-    "TND", "MAD", "PEN", "LKR", "UAH", "XOF", "UGX", "BYN", "XAF", "TZS",
-    "GHS", "RSD", "SYP", "AOA", "UGX", "KES", "MZN", "XPF", "VUV", "HTG",
-    "PYG", "BIF", "GMD", "KYD", "MVR", "LSL", "MWK", "NAD", "SCR", "SLL",
-    "SZL", "TOP", "XCD", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD",
-    "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD", "BIF", "BMD", "BND",
-    "BOB", "BRL", "BSD", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF",
-    "CLP", "CNY", "COP", "CRC", "CUC", "CUP", "CVE", "CZK", "DJF", "DKK",
-    "DOP", "DZD", "EGP", "ERN", "ETB", "EUR", "FJD", "FKP", "GBP", "GEL",
-    "GGP", "GHS", "GIP", "GMD", "GNF", "GTQ", "GYD", "HKD", "HNL", "HRK",
-    "HTG", "HUF", "IDR", "ILS", "IMP", "INR", "IQD", "IRR", "ISK", "JEP",
-    "JMD", "JOD", "JPY", "KES", "KGS", "KHR", "KMF", "KPW", "KRW", "KWD",
-    "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL", "LYD", "MAD", "MDL",
-    "MGA", "MKD", "MMK", "MNT", "MOP", "MRU", "MUR", "MVR", "MWK", "MXN",
-    "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB",
-    "PEN", "PGK", "PHP", "PKR", "PLN", "PYG", "QAR", "RON", "RSD", "RUB",
-    "RWF", "SAR", "SBD", "SCR", "SDG", "SEK", "SGD", "SHP", "SLL", "SOS",
-    "SRD", "SSP", "STN", "SVC", "SYP", "SZL", "THB", "TJS", "TMT", "TND",
-    "TOP", "TRY", "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS",
-    "VES", "VND", "VUV", "WST", "XAF", "XCD", "XDR", "XOF", "XPF", "ZAR"])
-to_currency = st.sidebar.selectbox('To Currency', options=['USD', 'EUR', 'GBP', 'JPY','MYR'])
-############################################################################################################################################
+amount = st.sidebar.number_input('Enter amount', min_value=0.01, step=0.01)
+from_currency = st.sidebar.selectbox('From Currency', options=["USD","MYR", "EUR", "JPY", "GBP", "AUD", "CAD", "CHF", "CNY", "SEK", "NZD"])
+to_currency = st.sidebar.selectbox('To Currency', options=["USD","MYR", "EUR", "JPY", "GBP", "AUD", "CAD", "CHF", "CNY", "SEK", "NZD"])
 
-#Convert currency#
+# Currency conversion
 if st.sidebar.button('Convert'):
-    c = CurrencyRates()
-    rate = c.get_rate(from_currency, to_currency)
-    converted_amount = amount * rate
-    st.sidebar.write(f'{amount} {from_currency} is equivalent to {converted_amount:.2f} {to_currency}')
+    url = f"https://api.exchangerate-api.com/v4/latest/{from_currency}"
+    response = requests.get(url)
+    data = response.json()
+    conversion_rate = data['rates'][to_currency]
+    converted_amount = amount * conversion_rate
+    st.sidebar.info(f'***{amount} {from_currency}***  is equivalent to  ***{converted_amount:.2f} {to_currency}***')
+
+
+# Create a list of spinner messages
+spinner_messages = [
+    'Please wait while the intern refills his coffee...',
+    'Web developers do it with <style>...',
+    'Spinning up the hamster wheel...',
+    'Spinning the wheel of fortune...',
+    'Shoveling coal into the server...',
+    'Programming the flux capacitor...'
+]
+
+# Choose a random spinner message
+spinner_message = random.choice(spinner_messages)
+
+# Display the selected page with the session state
+with st.spinner(spinner_message):
+    time.sleep(5)
+    pages[selection]()
+
+#pages[selection]()
+
+
+# for i in range(5):
+#     news_item = stock_ticker.news[i]
+#     img = get_thumbnail(news_item, default_image_url)
+#     with col1:
+#         with st.container(border=True):
+#             newscol1, newscol2 = st.columns([2, 5])
+#             newscol1.image(img, use_column_width=True)
+#             news_title = news_item["title"]
+#             newscol2.write(news_title)
+#             newscol2.link_button("Read News", news_item["link"])
+#             newscol2.write(f'Published by "{news_item["publisher"]}"')
+
+# news_publisher1 = stock_ticker.news[0]["publisher"]
+# news_publisher2 = stock_ticker.news[1]["publisher"]
+# news_publisher3 = stock_ticker.news[2]["publisher"]
+# news_publisher4 = stock_ticker.news[3]["publisher"]
+# news_publisher5 = stock_ticker.news[4]["publisher"]
+# img1 = stock_ticker.news[1]["thumbnail"]["resolutions"][0]["url"]
+# st.image(img1, use_column_width=True)
 
 
 
-##stock ticker list##
-url = "https://en.wikipedia.org/wiki/NASDAQ-100"
-nasdaq100_tickers = pd.read_html(url)[4]
-stock_list = nasdaq100_tickers
-stock_ticker_list = nasdaq100_tickers['Ticker'].tolist()
-##st.write(stock_list)
-st.divider()
+# with col1:
+#     with st.container(border = True):
+#         newscol1,newscol2 = st.columns([2,5])
+#         newscol1.image(img1, use_column_width=True)
+#         news_title = stock_ticker.news[0]["title"]
+#         newscol2.write(news_title)
+#         newscol2.link_button("Read News", stock_ticker.news[0]["link"])
+#         newscol2.write(f'Publised by "{news_publisher1}"')   
 
-
-##stockselection##
-colss = st.columns([2,1,4])
-with colss[0].container():
-    #cols = st.columns([1, 1, 1])
-    stock = st.selectbox("SELECT A STOCK", stock_ticker_list)
-    stock_ticker = yf.Ticker(stock)
-    stock_name = stock_ticker.info["longName"]
-
-##timeframe##
-    default_start_date = datetime.today() - timedelta(weeks=52)
-    cols = st.columns([2, 2])
-    start_date = cols[0].date_input("Start Date", default_start_date)
-    end_date = cols[1].date_input("End Date")
-    hist = stock_ticker.history(period="1mo")
-    st.markdown("![Alt Text](https://media.giphy.com/media/TLayDh2IZOHPW/giphy.gif)")
-    #st.markdown("![Alt](https://media.giphy.com/media/Xf1ghvcjLrMn3O6Qe4/giphy.gif)")
-    colss[2].write(stock_list)
-
-st.divider()
-stock_ticker = yf.Ticker(stock)
-
-#st.write(stock_ticker.recommendations)
-#st.write(stock_ticker.recommendations_summary)
-
-###stock data###
-with st.container():
-    collu = st.columns([2,3])
-    current_price = stock_ticker.info["currentPrice"]
-    previous_price = stock_ticker.info["previousClose"]
-    current_percent = current_price / previous_price * 100 - 100
-    #float(current_percent)
-    new_current_percent = round(current_percent,3)
-    collu[0].title(f":blue[{stock_name}]")
-    if current_price < previous_price:
-        collu[1].title(f"{current_price}  🔻:red[{new_current_percent}%]")
-    else:
-        collu[1].title(f"{current_price}  🔺:green[{new_current_percent}%]")
-           
-###stock table###
-with st.container():
-    cols = st.columns([5,5,2])
-    cols[0].header(" Stock Prices Table")
-    stock_data = yf.download(stock, start=start_date, end=end_date)
-    cols[0].write(stock_data)
-    ##table alternative (other data type)##
-    #stock_table = st.dataframe(hist)
-    
-##bar graph##
-    cols[1].header("Stock Prices Graph")
-    
-    fig = go.Figure(data= go.Candlestick(x=stock_data.index,
-                                        open=stock_data['Open'],
-                                        high=stock_data['High'],
-                                        low=stock_data['Low'],
-                                        close=stock_data['Close']))
-
-    fig.update_layout(yaxis_title=f'Price',
-                        xaxis_title='Date')
-
-    cols[1].plotly_chart(fig)
-    if cols[1].button("Refresh Page"):
-        st.experimental_rerun()
-
-
-##collumn##    
-col1, col2 = st.columns([3,2])
-#col2.write('Column 1')
-col1.title('LATEST NEWS ON THE COMPANY')  
-
-##news##
-news_publisher1 = stock_ticker.news[0]["publisher"]
-news_publisher2 = stock_ticker.news[1]["publisher"]
-news_publisher3 = stock_ticker.news[2]["publisher"]
-news_publisher4 = stock_ticker.news[3]["publisher"]
-news_publisher5 = stock_ticker.news[4]["publisher"]
-with col1:
-    with st.container(border = True):
-        stock_ticker.news[0]["title"]
-        stock_ticker.news[0]["link"]
-        st.write(f'Publised by "{news_publisher1}"')   
-
-    with st.container(border = True):
-        stock_ticker.news[1]["title"]
-        stock_ticker.news[1]["link"] 
-        st.write(f'Publised by "{news_publisher2}"')   
+#     with st.container(border = True):
+#         stock_ticker.news[1]["title"]
+#         st.link_button("Read News", stock_ticker.news[1]["link"]) 
+#         st.write(f'Publised by "{news_publisher2}"')   
         
-    with st.container(border = True):
-        stock_ticker.news[2]["title"]
-        stock_ticker.news[2]["link"]
-        st.write(f'Publised by "{news_publisher3}"')   
+#     with st.container(border = True):
+#         stock_ticker.news[2]["title"]
+#         st.link_button("Read News", stock_ticker.news[2]["link"])
+#         st.write(f'Publised by "{news_publisher3}"')   
 
-    with st.container(border = True):
-        stock_ticker.news[3]["title"]
-        stock_ticker.news[3]["link"]
-        st.write(f'Publised by "{news_publisher4}"') 
+#     with st.container(border = True):
+#         stock_ticker.news[3]["title"]
+#         st.link_button("Read News", stock_ticker.news[3]["link"])
+#         st.write(f'Publised by "{news_publisher4}"') 
         
-    with st.container(border = True):
-        stock_ticker.news[4]["title"]
-        stock_ticker.news[4]["link"]
-        st.write(f'Publised by "{news_publisher5}"') 
+#     with st.container(border = True):
+#         stock_ticker.news[4]["title"]
+#         st.link_button("Read News", stock_ticker.news[4]["link"])
+#         st.write(f'Publised by "{news_publisher5}"') 
 
-with col2:
-    col2.title('  ')
-    st.markdown("![Alt Text](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExem44aXVwYjFrMmU5bnN3ZnIxcThsc292bGxsOWtuaTFtdzZjYWRhYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YnkMcHgNIMW4Yfmjxr/giphy.gif)")
-#    stock_ticker.info
-#    stock_ticker.news
+# with col2:
+#     st.markdown("![Alt Text](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExem44aXVwYjFrMmU5bnN3ZnIxcThsc292bGxsOWtuaTFtdzZjYWRhYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YnkMcHgNIMW4Yfmjxr/giphy.gif)")
+# #    stock_ticker.info
+# #    stock_ticker.news
+# img1 = stock_ticker.news[1]["thumbnail"]["resolutions"][0]["url"]
+# st.write(img1)
+# image_url = "https://s.yimg.com/uu/api/res/1.2/UfNPsRi0m54aItY_qLFDbg--~B/Zmk9ZmlsbDtoPTE0MDtweW9mZj0wO3c9MTQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/zacks.com/46ebfcbff417ac1bbde85ad33fa0d4be"
+# st.image(img1, use_column_width=True)
 
 
-# Sidebar with real-time clock
-st.sidebar.header("Real-Time Clock")
+# # Sidebar with real-time clock
+# st.sidebar.header("Real-Time Clock")
 
-# Placeholder for the clock
-clock_placeholder = st.sidebar.empty()
+# # Placeholder for the clock
+# clock_placeholder = st.sidebar.empty()
 
-while True:
-    # Get the current time
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# while True:
+#     # Get the current time
+#     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    # Update the clock in the sidebar
-    clock_placeholder.markdown(f"**{now}**")
+#     # Update the clock in the sidebar
+#     clock_placeholder.markdown(f"**{now}**")
     
-    # Sleep for 1 second before updating the time again
-    time.sleep(1)
+#     # Sleep for 1 second before updating the time again
+#     #time.sleep(1)
 
