@@ -125,7 +125,8 @@ def main():
         #float(current_percent)
         new_current_percent = round(current_percent,3)
         #collu[0].markdown(gradient_text_html.format(stock_name), unsafe_allow_html=True)
-        collu[0].markdown(f"<h1 style='background: linear-gradient(to right, #073f6b, #61C2C6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{stock_name}</h1>", unsafe_allow_html=True)
+        collu[0].title(f"{stock_name}")
+        #collu[0].markdown(f"<h1 style='background: linear-gradient(to right, #073f6b, #61C2C6); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>{stock_name}</h1>", unsafe_allow_html=True)
         if current_price < previous_price:
             collu[1].title(f"{current_price} 🔻:red[{new_current_percent}%]")
             #collu[1].markdown(f"<p style='font-weight: bold; text-align: inline; font-size: 34px;'>Current price: {current_price}<p style='font-weight: bold; text-align: inline; font-size: 20px;color:red'>{current_price}{new_current_percent}%", unsafe_allow_html=True)
