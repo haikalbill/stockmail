@@ -178,11 +178,11 @@ def main():
             return default_image_url
         
     def display_news_item(news_item):
-        # default_image_url = "https://i.ibb.co/chVqfCZ/1.png"  # Replace with your actual default image URL
-        # img_url = get_thumbnail(news_item, default_image_url)
-        # response = requests.get(img_url)
-        # img = Image.open(BytesIO(response.content))
-        # img.thumbnail((100, 100))  # Set width and height in pixels
+        default_image_url = "https://i.ibb.co/chVqfCZ/1.png"  # Replace with your actual default image URL
+        img_url = get_thumbnail(news_item, default_image_url)
+        response = requests.get(img_url)
+        img = Image.open(BytesIO(response.content))
+        img.thumbnail((100, 100))  # Set width and height in pixels
         with st.container(height =170 ,border=True):
             newscol1, newscol2 = st.columns([1, 5])
             # newscol1.image(img,use_column_width=True)
@@ -203,9 +203,16 @@ def main():
     #         display_news_item(news_item)
     
     try:
-        for i in range(4):
-            news_item = stock_ticker.news[i]
-            if news_item:  # Check if news_item is not empty
-                display_news_item(news_item)
-    except (requests.exceptions.JSONDecodeError, IndexError) as e:
+        if stock_ticker.news:
+            newscoll1, newscoll2 = st.columns([1,1])
+            with newscoll1:
+                for i in range(4):
+                    news_item = stock_ticker.news[i]
+                    display_news_item(news_item)
+    
+            with newscoll2:
+                for i in range(4, min(8, len(stock_ticker.news))):
+                    news_item = stock_ticker.news[i]
+                    display_news_item(news_item)
+    except requests.exceptions.JSONDecodeError as e:
         st.write(f"An error occurred: {e}")
