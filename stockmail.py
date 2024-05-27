@@ -21,6 +21,9 @@ from money import Money
 import requests
 from PIL import Image
 import forecast
+from dateutil.parser import parse
+
+
 
 def main():
     ##stock ticker list##
