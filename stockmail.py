@@ -206,7 +206,20 @@ def main():
             for i in range(4, min(8, len(news_items))):
                 news_item = news_items[i]
                 display_news_item(news_item)
+        # Check if news is available
+    if hasattr(stock_ticker, 'news') and stock_ticker.news:
+        newscoll1, newscoll2 = st.columns([1,1])
+        with newscoll1:
+            for i in range(4):
+                news_item = stock_ticker.news[i]
+                display_news_item(news_item)
     
+        with newscoll2:
+            for i in range(4, min(8, len(stock_ticker.news))):
+                news_item = stock_ticker.news[i]
+                display_news_item(news_item)
+    else:
+        st.error("News data is not available for the selected stock.")
     # Usage
     display_news(stock_ticker)
     
