@@ -185,7 +185,7 @@ def main():
         img.thumbnail((100, 100))  # Set width and height in pixels
         with st.container(height =170 ,border=True):
             newscol1, newscol2 = st.columns([1, 5])
-            # newscol1.image(img,use_column_width=True)
+            newscol1.image(img,use_column_width=True)
             newscol2.info(news_item["title"])
             newscol1.link_button("Read News", news_item["link"])
             newscol2.warning(f'Published by ***{news_item["publisher"]}***')
