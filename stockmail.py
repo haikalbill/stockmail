@@ -171,14 +171,12 @@ def main():
     ##news##
     st.title(f'📰 Latest News on {stock_name} ')
     
-    @st.cache(allow_output_mutation=True)
     def get_thumbnail(news_item, default_image_url):
         try:
             return news_item["thumbnail"]["resolutions"][0]["url"]
         except KeyError:
             return default_image_url
-            
-    @st.cache(allow_output_mutation=True)        
+        
     def display_news_item(news_item):
         default_image_url = "https://i.ibb.co/chVqfCZ/1.png"  # Replace with your actual default image URL
         img_url = get_thumbnail(news_item, default_image_url)
@@ -191,40 +189,17 @@ def main():
             newscol2.info(news_item["title"])
             newscol1.link_button("Read News", news_item["link"])
             newscol2.warning(f'Published by ***{news_item["publisher"]}***')
-            
-    @st.cache(allow_output_mutation=True)        
-    def display_news(stock_ticker):
-        try:
-            news_items = stock_ticker.news
-        except requests.exceptions.JSONDecodeError:
-            st.error("News data is not available for the selected stock.")
-            return
-    
-        newscoll1, newscoll2 = st.columns([1,1])
-        with newscoll1:
-            for i in range(4):
-                news_item = news_items[i]
-                display_news_item(news_item)
-    
-        with newscoll2:
-            for i in range(4, min(8, len(news_items))):
-                news_item = news_items[i]
-                display_news_item(news_item)
-        # Check if news is available
-    if hasattr(stock_ticker, 'news') and stock_ticker.news:
-        newscoll1, newscoll2 = st.columns([1,1])
-        with newscoll1:
-            for i in range(4):
-                news_item = stock_ticker.news[i]
-                display_news_item(news_item)
-    
-        with newscoll2:
-            for i in range(4, min(8, len(stock_ticker.news))):
-                news_item = stock_ticker.news[i]
-                display_news_item(news_item)
-    else:
-        st.error("News data is not available for the selected stock.")
-    # Usage
-    display_news(stock_ticker)
+
+    #Usage
+    newscoll1, newscoll2 = st.columns([1,1])
+    with newscoll1:
+        for i in range(4):
+            news_item = stock_ticker.news[i]
+            display_news_item(news_item)
+
+    with newscoll2:
+        for i in range(4, min(8, len(stock_ticker.news))):
+            news_item = stock_ticker.news[i]
+            display_news_item(news_item)
     
 
