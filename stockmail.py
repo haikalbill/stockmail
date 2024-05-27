@@ -169,13 +169,16 @@ def main():
 
 
     ##news##
-    st.title(f'📰 Latest News on {stock_name} ')  
-
+    st.title(f'📰 Latest News on {stock_name} ')
+    
+    @st.cache(allow_output_mutation=True)
     def get_thumbnail(news_item, default_image_url):
         try:
             return news_item["thumbnail"]["resolutions"][0]["url"]
         except KeyError:
             return default_image_url
+            
+    @st.cache(allow_output_mutation=True)        
     def display_news_item(news_item):
         default_image_url = "https://i.ibb.co/chVqfCZ/1.png"  # Replace with your actual default image URL
         img_url = get_thumbnail(news_item, default_image_url)
@@ -189,6 +192,7 @@ def main():
             newscol1.link_button("Read News", news_item["link"])
             newscol2.warning(f'Published by ***{news_item["publisher"]}***')
             
+    @st.cache(allow_output_mutation=True)        
     def display_news(stock_ticker):
         try:
             news_items = stock_ticker.news
