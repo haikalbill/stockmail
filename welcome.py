@@ -23,6 +23,7 @@ from PIL import Image
 import forecast
 import stockmail
 import welcome
+from dateutil.parser import parse
 
 
 def main():
