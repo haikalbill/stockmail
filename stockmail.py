@@ -205,6 +205,7 @@ def main():
     try:
         for i in range(4):
             news_item = stock_ticker.news[i]
-            display_news_item(news_item)
-    except requests.exceptions.JSONDecodeError as e:
-            st.write(f"An error occurred: {e}")
+            if news_item:  # Check if news_item is not empty
+                display_news_item(news_item)
+    except (requests.exceptions.JSONDecodeError, IndexError) as e:
+        st.write(f"An error occurred: {e}")
