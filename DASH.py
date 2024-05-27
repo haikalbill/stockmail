@@ -24,6 +24,9 @@ from PIL import Image
 import forecast
 import stockmail
 import welcome
+from dateutil.parser import parse
+
+
 st.set_page_config(page_title="Stockmail",
                    page_icon=" :bar_chart",
                    layout= "wide"
