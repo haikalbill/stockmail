@@ -176,7 +176,19 @@ def main():
             return news_item["thumbnail"]["resolutions"][0]["url"]
         except KeyError:
             return default_image_url
-        
+    def display_news_item(news_item):
+        default_image_url = "https://i.ibb.co/chVqfCZ/1.png"  # Replace with your actual default image URL
+        img_url = get_thumbnail(news_item, default_image_url)
+        response = requests.get(img_url)
+        img = Image.open(BytesIO(response.content))
+        img.thumbnail((100, 100))  # Set width and height in pixels
+        with st.container(height =170 ,border=True):
+            newscol1, newscol2 = st.columns([1, 5])
+            newscol1.image(img,use_column_width=True)
+            newscol2.info(news_item["title"])
+            newscol1.link_button("Read News", news_item["link"])
+            newscol2.warning(f'Published by ***{news_item["publisher"]}***')
+            
     def display_news(stock_ticker):
         try:
             news_items = stock_ticker.news
