@@ -171,15 +171,42 @@ def main():
     ##news##
     st.title(f'📰 Latest News on {stock_name} ')
 
-    news1 = stock_ticker.news[0]["title"]
-    news2 = stock_ticker.news[1]["title"]
-    news3 = stock_ticker.news[2]["title"]
-    news4 = stock_ticker.news[3]["title"]
+    newsapi = "cdd8370b03f649e4816d222a979ae4ff"
 
-    st.write(news1)
-    st.write(news2)
-    st.write(news3)
-    st.write(news4)
+    def get_thumbnail(news_item, default_image_url):
+        try:
+            return news_item["urlToImage"]
+        except KeyError:
+            return default_image_url
+
+    def get_stock_news(stock_ticker):
+        url = f"https://newsapi.org/v2/everything?q={stock_ticker}&apiKey={newsapi}&sortBy=publishedAt"
+        response = requests.get(url)
+        data = response.json()
+        if data["status"] != "ok":
+            raise Exception("Failed to fetch news")
+        return data["articles"]
+    
+    def display_news(stock_ticker):
+        st.title(f"News related to {stock_ticker}")
+        articles = get_stock_news(stock_ticker)[:10]  # Get first 10 articles
+        default_image_url = "https://i.ibb.co/chVqfCZ/1.png"  # Replace with your actual default image URL
+        newscol1, newscol2 = st.columns([1, 1])
+        for i, news_item in enumerate(articles):
+            img_url = get_thumbnail(news_item, default_image_url)
+            response = requests.get(img_url)
+            img = Image.open(BytesIO(response.content))
+            img.thumbnail((100, 100))  # Set width and height in pixels
+            with newscol1 if i < 5 else newscol2:  # Add news item to the appropriate column
+                with st.container(border=True, height=200):
+                    col1, col2  = st.columns([2, 6,])
+                    col1.image(img, use_column_width=True)
+                    col2.info(news_item["title"])
+                    col1.link_button("Read News", news_item["url"])
+                    col2.warning(f'Published by ***{news_item["source"]["name"]}***')
+                    col1.error(f'{parse(news_item["publishedAt"]).strftime("%Y-%m-%d")}') 
+    
+    display_news(stock)
     
     # def get_thumbnail(news_item, default_image_url):
     #     try:
