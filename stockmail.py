@@ -48,7 +48,7 @@ def main():
     # Adding a selectbox for sorting criterion
     colss = st.columns([2,11])
     sort_by = colss[0].selectbox('Sort stocks by:', ('Most Expensive', 'Least Expensive', 'Most Active', 'Least Active'))
-
+    
     if not top_stock.empty:
         # Merging stock list with stock data to include names
         merged_data = pd.merge(stock_list, top_stock, left_on='Ticker', right_on='Ticker', how='left')
@@ -191,13 +191,20 @@ def main():
             newscol2.warning(f'Published by ***{news_item["publisher"]}***')
 
     # Usage
-    newscoll1, newscoll2 = st.columns([1,1])
-    with newscoll1:
+    # newscoll1, newscoll2 = st.columns([1,1])
+    # with newscoll1:
+    #     for i in range(4):
+    #         news_item = stock_ticker.news[i]
+    #         display_news_item(news_item)
+
+    # with newscoll2:
+    #     for i in range(4, min(8, len(stock_ticker.news))):
+    #         news_item = stock_ticker.news[i]
+    #         display_news_item(news_item)
+    
+    try:
         for i in range(4):
             news_item = stock_ticker.news[i]
             display_news_item(news_item)
-
-    with newscoll2:
-        for i in range(4, min(8, len(stock_ticker.news))):
-            news_item = stock_ticker.news[i]
-            display_news_item(news_item)
+    except requests.exceptions.JSONDecodeError as e:
+            st.write(f"An error occurred: {e}")
