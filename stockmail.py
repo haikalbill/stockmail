@@ -171,6 +171,12 @@ def main():
     ##news##
     st.title(f'📰 Latest News on {stock_name} ')  
 
+    def get_thumbnail(news_item, default_image_url):
+        try:
+            return news_item["thumbnail"]["resolutions"][0]["url"]
+        except KeyError:
+            return default_image_url
+        
     def display_news_item(news_item):
         default_image_url = "https://i.ibb.co/chVqfCZ/1.png"  # Replace with your actual default image URL
         try:
