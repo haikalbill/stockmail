@@ -24,6 +24,7 @@ import forecast
 import stockmail
 import welcome
 from dateutil.parser import parse
+from PIL import UnidentifiedImageError
 
 
 def main():
