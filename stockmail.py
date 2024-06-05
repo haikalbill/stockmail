@@ -193,7 +193,7 @@ def main():
     def display_news(stock_ticker):
         st.title(f"News related to {stock_ticker}")
         articles = get_stock_news(stock_ticker)[:10]  # Get first 10 articles
-        default_image_url = "https://postimg.cc/gw7RDgWB"  # Replace with your actual default image URL
+        default_image_url = "https://i.postimg.cc/ht8ThrmG/Screenshot-2023-11-09-005814.png"  # Replace with your actual default image URL
         newscol1, newscol2 = st.columns([1, 1])
         for i, news_item in enumerate(articles):
             img_url = get_thumbnail(news_item, default_image_url)
