@@ -23,6 +23,7 @@ from PIL import Image
 import forecast
 from dateutil.parser import parse
 from PIL import UnidentifiedImageError
+from urllib.parse import urlparse
 
 
 
@@ -94,10 +95,9 @@ def main():
     with colss[0].container():
         #cols = st.columns([1, 1, 1])
         
-        stock = st.selectbox("Select a Stock",  stock_ticker_list)
+        stock = st.selectbox("Select a Stock", stock_ticker_list)
         stock_ticker = yf.Ticker(stock)
         stock_name = stock_ticker.info["longName"]
-
     ##timeframe##
         default_start_date = datetime.today() - timedelta(weeks=52)
         cols = st.columns([2, 2])
@@ -175,12 +175,12 @@ def main():
     st.title(f'📰 Latest News on {stock_name} ')
 
     newsapi = "cdd8370b03f649e4816d222a979ae4ff"
-
-    def get_thumbnail(news_item, default_image_url):
+    
+    def get_thumbnail(news_item, default_img):
         try:
             return news_item["urlToImage"]
         except KeyError:
-            return default_image_url
+            return default_img
 
     def get_stock_news(stock_ticker):
         url = f"https://newsapi.org/v2/everything?q={stock_ticker}&apiKey={newsapi}&sortBy=publishedAt"
@@ -189,41 +189,28 @@ def main():
         if data["status"] != "ok":
             raise Exception("Failed to fetch news")
         return data["articles"]
+    def is_valid_url(url):
+        try:
+            result = urlparse(url)
+            return all([result.scheme, result.netloc])
+        except ValueError:
+            return False
+    
     def display_news(stock_ticker):
-        st.title(f"News related to {stock_ticker}")
         articles = get_stock_news(stock_ticker)[:10]  # Get first 10 articles
-        def display_news(stock_ticker):
-        st.title(f"News related to {stock_ticker}")
-        articles = get_stock_news(stock_ticker)[:10]  # Get first 10 articles
-        default_image_url = "https://i.postimg.cc/ht8ThrmG/Screenshot-2023-11-09-005814.png"  # Replace with your actual default image URL
+        default_image_url = "https://i.ibb.co/Z24gZ2v/Black-White-Minimalist-Logo.jpg"  # Replace with your actual default image URL
         newscol1, newscol2 = st.columns([1, 1])
         for i, news_item in enumerate(articles):
             img_url = get_thumbnail(news_item, default_image_url)
-            try:
-                response = requests.get(img_url)
-                img = Image.open(BytesIO(response.content))
-                img.thumbnail((100, 100))  # Set width and height in pixels
-            except UnidentifiedImageError:
+            if img_url is None or not is_valid_url(img_url):
                 img = Image.open(requests.get(default_image_url, stream=True).raw)
-            with newscol1 if i < 5 else newscol2:  # Add news item to the appropriate column
-                with st.container(border=True, height=200):
-                    col1, col2  = st.columns([2, 6,])
-                    col1.image(img, use_column_width=True)
-                    col2.info(news_item["title"])
-                    col1.link_button("Read News", news_item["url"])
-                    col2.warning(f'Published by ***{news_item["source"]["name"]}***')
-                    col1.error(f'{parse(news_item["publishedAt"]).strftime("%Y-%m-%d")}') 
-
-    display_news(stock)  # Replace with your actual default image URL
-        newscol1, newscol2 = st.columns([1, 1])
-        for i, news_item in enumerate(articles):
-            img_url = get_thumbnail(news_item, default_image_url)
-            try:
-                response = requests.get(img_url)
-                img = Image.open(BytesIO(response.content))
-                img.thumbnail((100, 100))  # Set width and height in pixels
-            except UnidentifiedImageError:
-                img = Image.open(requests.get(default_image_url, stream=True).raw)
+            else:
+                try:
+                    response = requests.get(img_url)
+                    img = Image.open(BytesIO(response.content))
+                    img.thumbnail((100, 100))  # Set width and height in pixels
+                except UnidentifiedImageError:
+                    img = Image.open(requests.get(default_image_url, stream=True).raw)
             with newscol1 if i < 5 else newscol2:  # Add news item to the appropriate column
                 with st.container(border=True, height=200):
                     col1, col2  = st.columns([2, 6,])
@@ -234,27 +221,25 @@ def main():
                     col1.error(f'{parse(news_item["publishedAt"]).strftime("%Y-%m-%d")}') 
 
     display_news(stock)
+
+    # def get_stock_news(stock_ticker):
+    #     url = f"https://newsapi.org/v2/everything?q={stock_ticker}&apiKey={newsapi}&sortBy=publishedAt"
+    #     response = requests.get(url)
+    #     data = response.json()
+    #     if data["status"] != "ok":
+    #         raise Exception("Failed to fetch news")
+    #     return data["articles"]
+
     # def display_news(stock_ticker):
-    #     st.title(f"News related to {stock_ticker}")
-    #     articles = get_stock_news(stock_ticker)[:10]  # Get first 10 articles
-    #     default_image_url = "https://i.ibb.co/Z24gZ2v/Black-White-Minimalist-Logo.jpg"
+    #     articles = get_stock_news(stock_ticker)[:5]  # Limit to first 5 articles
     #     newscol1, newscol2 = st.columns([1, 1])
-    #     for i, news_item in enumerate(articles):
-    #         img_url = get_thumbnail(news_item, default_image_url)
-    #         response = requests.get(img_url)
-    #         img = Image.open(BytesIO(response.content))
-    #         img.thumbnail((100, 100))  # Set width and height in pixels
+    #     for i, article in enumerate(articles):
     #         with newscol1 if i < 5 else newscol2:  # Add news item to the appropriate column
-    #             with st.container(border=True, height=200):
-    #                 col1, col2  = st.columns([2, 6,])
-    #                 col1.image(img, use_column_width=True)
-    #                 col2.info(news_item["title"])
-    #                 col1.link_button("Read News", news_item["url"])
-    #                 col2.warning(f'Published by ***{news_item["source"]["name"]}***')
-    #                 col1.error(f'{parse(news_item["publishedAt"]).strftime("%Y-%m-%d")}') 
-    
-    # display_news(stock)
-    
+    #             st.subheader(article["title"])
+    #             st.write(f"Read more: [link]({article['url']})")
+    #             st.write("---")
+
+    # Usage
     # def get_thumbnail(news_item, default_image_url):
     #     try:
     #         return news_item["thumbnail"]["resolutions"][0]["url"]
@@ -274,7 +259,7 @@ def main():
     #         newscol1.link_button("Read News", news_item["link"])
     #         newscol2.warning(f'Published by ***{news_item["publisher"]}***')
 
-    # #Usage
+    #Usage
     # newscoll1, newscoll2 = st.columns([1,1])
     # with newscoll1:
     #     for i in range(4):
@@ -284,6 +269,4 @@ def main():
     # with newscoll2:
     #     for i in range(4, min(8, len(stock_ticker.news))):
     #         news_item = stock_ticker.news[i]
-    #         display_news_item(news_item)
-    
-
+    #         display_news_item(news_item)   
