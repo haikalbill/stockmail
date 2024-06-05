@@ -96,6 +96,7 @@ def main():
         stock = st.selectbox("Select a Stock", stock_ticker_list)
         stock_ticker = yf.Ticker(stock)
         stock_name = stock_ticker.info["longName"]
+        stock_ticker_list.remove('ADBE')
 
 
     ##timeframe##
