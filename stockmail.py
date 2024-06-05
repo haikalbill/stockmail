@@ -93,7 +93,7 @@ def main():
     with colss[0].container():
         #cols = st.columns([1, 1, 1])
         
-        stock = st.selectbox("Select a Stock", stock_ticker_list)
+        stock = st.selectbox("Select a Stock",  stock_ticker_list.index('AAPL'))
         stock_ticker = yf.Ticker(stock)
         stock_name = stock_ticker.info["longName"]
         stock_ticker_list.remove('ADBE')
