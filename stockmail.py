@@ -22,6 +22,7 @@ import requests
 from PIL import Image
 import forecast
 from dateutil.parser import parse
+from PIL import UnidentifiedImageError
 
 
 
