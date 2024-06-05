@@ -188,7 +188,6 @@ def main():
         if data["status"] != "ok":
             raise Exception("Failed to fetch news")
         return data["articles"]
-    
     def display_news(stock_ticker):
         st.title(f"News related to {stock_ticker}")
         articles = get_stock_news(stock_ticker)[:10]  # Get first 10 articles
@@ -196,9 +195,12 @@ def main():
         newscol1, newscol2 = st.columns([1, 1])
         for i, news_item in enumerate(articles):
             img_url = get_thumbnail(news_item, default_image_url)
-            response = requests.get(img_url)
-            img = Image.open(BytesIO(response.content))
-            img.thumbnail((100, 100))  # Set width and height in pixels
+            try:
+                response = requests.get(img_url)
+                img = Image.open(BytesIO(response.content))
+                img.thumbnail((100, 100))  # Set width and height in pixels
+            except UnidentifiedImageError:
+                img = Image.open(requests.get(default_image_url, stream=True).raw)
             with newscol1 if i < 5 else newscol2:  # Add news item to the appropriate column
                 with st.container(border=True, height=200):
                     col1, col2  = st.columns([2, 6,])
@@ -207,8 +209,28 @@ def main():
                     col1.link_button("Read News", news_item["url"])
                     col2.warning(f'Published by ***{news_item["source"]["name"]}***')
                     col1.error(f'{parse(news_item["publishedAt"]).strftime("%Y-%m-%d")}') 
-    
+
     display_news(stock)
+    # def display_news(stock_ticker):
+    #     st.title(f"News related to {stock_ticker}")
+    #     articles = get_stock_news(stock_ticker)[:10]  # Get first 10 articles
+    #     default_image_url = "https://i.ibb.co/Z24gZ2v/Black-White-Minimalist-Logo.jpg"
+    #     newscol1, newscol2 = st.columns([1, 1])
+    #     for i, news_item in enumerate(articles):
+    #         img_url = get_thumbnail(news_item, default_image_url)
+    #         response = requests.get(img_url)
+    #         img = Image.open(BytesIO(response.content))
+    #         img.thumbnail((100, 100))  # Set width and height in pixels
+    #         with newscol1 if i < 5 else newscol2:  # Add news item to the appropriate column
+    #             with st.container(border=True, height=200):
+    #                 col1, col2  = st.columns([2, 6,])
+    #                 col1.image(img, use_column_width=True)
+    #                 col2.info(news_item["title"])
+    #                 col1.link_button("Read News", news_item["url"])
+    #                 col2.warning(f'Published by ***{news_item["source"]["name"]}***')
+    #                 col1.error(f'{parse(news_item["publishedAt"]).strftime("%Y-%m-%d")}') 
+    
+    # display_news(stock)
     
     # def get_thumbnail(news_item, default_image_url):
     #     try:
