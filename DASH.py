@@ -25,6 +25,7 @@ import forecast
 import stockmail
 import welcome
 from dateutil.parser import parse
+from PIL import UnidentifiedImageError
 
 
 st.set_page_config(page_title="Stockmail",
